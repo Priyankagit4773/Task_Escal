@@ -142,13 +142,25 @@
             <td>${d.priority}</td>
             <td>${d.issue}</td>
             <td>${d.description}</td>
-            <td>${d.Status}</td>
+            <td>
+  <select onchange="updateStatus(${index}, this.value)">
+    <option value="Pending" ${d.Status === "Pending" ? "selected" : ""}>Pending</option>
+    <option value="InProgress" ${d.Status === "InProgress" ? "selected" : ""}>InProgress</option>
+    <option value="Resolved" ${d.Status === "Resolved" ? "selected" : ""}>Resolved</option>
+  </select>
+</td>
             <td><button class="delete-btn" onclick="deleteRecord(${index})">Delete</button></td>
           </tr>
         `;
         tableBody.innerHTML += row;
       });
     }
+    function updateStatus(index, newStatus) {
+  const data = JSON.parse(localStorage.getItem("taskEscalations") || "[]");
+  data[index].Status = newStatus;
+  localStorage.setItem("taskEscalations", JSON.stringify(data));
+  renderTable();
+}
 
     function deleteRecord(index) {
       if (!checkPassword()) return;
