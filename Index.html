@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Ticket Escalation Application Support to DEV Team</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background-color: #f9f9f9; }
+    h1, h2 { color: #333; }
+    label { display: block; margin: 10px 0 5px; }
+    input, select, textarea { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; }
+    textarea { height: 80px; }
+    button { padding: 10px 20px; margin: 10px 5px 10px 0; background: #007BFF; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    button:hover { background: #0056b3; }
+    .delete-btn { background: #dc3545; }
+    .delete-btn:hover { background: #c82333; }
+    .success { color: green; margin: 10px 0; }
+    table { width: 100%; border-collapse: collapse; margin-top: 30px; }
+    th, td { border: 1px solid #ddd; padding: 8px; font-size: 14px; }
+    th { background-color: #f2f2f2; }
+  </style>
+</head>
+<body>
+
+  <h1>Ticket Escalation </h1>
+
+  <div>
+    <h2>Application Support to DEV Team</h2>
+    <form id="escalationForm">
+      <label for="reportedBy">Reported By:</label>
+      <select id="reportedBy" name="reportedBy" required>
+        <option value="">--Select Name--</option>
+        <option value="Priyanka">Priyanka</option>
+        <option value="Chamod">Chamod</option>
+        <option value="Manjari">Manjari</option>
+        <option value="Chathura">Chathura</option>
+        <option value="Kavisha">Kavisha</option>
+      </select>
+
+      <label for="reportedDate">Reported Date:</label>
+      <input type="date" id="reportedDate" name="reportedDate" required>
+
+      <label for="Report_To">Report To:</label>
+<select id="Report_To" name="Report_To" required>
+  <option value="">--Select Person--</option>
+  <option value="DEV Team">DEV Team</option>
+  <option value="QA Team">QA Team</option>
+  <option value="Support Lead">Sport Radar SupportTeam</option>
+  <option value="Infrastructure Team">Gaming Support Team</option>
+  <option value="Security Team">Rishwa</option>
+</select>
+
+      <label for="application">Application Name:</label>
+     <select id="Application Name" name="Application Name" required>
+  <option value="">--Select Category--</option>
+  <option value="Betss">Betss</option>
+  <option value="Retail">Retail</option>
+
+</select>
+
+      <label for="priority">Priority:</label>
+      <select id="priority" name="priority" required>
+        <option value="">--Select Priority--</option>
+        <option value="Critical">Critical</option>
+        <option value="High">High</option>
+        <option value="Medium">Medium</option>
+        <option value="Low">Low</option>
+      </select>
+
+      <label for="issue">Issue Summary:</label>
+      <input type="text" id="issue" name="issue" required>
+
+      <label for="description">Detailed Description:</label>
+      <textarea id="description" name="description" required></textarea>
+
+      <label for="Status">Status:</label>
+      <select id="Status" name="Status" required>
+        <option value="">--Select Status--</option>
+        <option value="Pending">Pending</option>
+        <option value="Resolved">Resolved</option>
+        <option value="InProgress">InProgress</option>
+      </select>
+
+      <button type="submit">Save Task Data</button>
+    </form>
+    <p class="success" id="successMessage"></p>
+  </div>
+
+  <button onclick="downloadCSV()">Download CSV</button>
+  <button onclick="clearAllData()" class="delete-btn">Clear All Data</button>
+
+  <h2>Saved Records</h2>
+  <table id="recordsTable">
+    <thead>
+      <tr>
+        <th>Reported By</th>
+        <th>Reported Date</th>
+        <th>Report To</th>
+        <th>Application</th>
+        <th>Priority</th>
+        <th>Issue Summary</th>
+        <th>Description</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const PASSWORD = "admin123"; // 🔑 Change this to your desired password
+
+    const form = document.getElementById("escalationForm");
+    const tableBody = document.querySelector("#recordsTable tbody");
+    const successMessage = document.getElementById("successMessage");
+
+    form.addEventListener("submit", function(e) {
+      e.preventDefault();
+      const data = collectFormData();
+      saveToLocalStorage(data);
+      successMessage.textContent = "Task data saved successfully!";
+      form.reset();
+      renderTable();
+    });
+
+    function collectFormData() {
+      return {
+        reportedBy: document.getElementById("reportedBy").value,
+        reportedDate: document.getElementById("reportedDate").value,
+        Report_To: document.getElementById("Report_To").value,
+        application: document.getElementById("application").value,
+        priority: document.getElementById("priority").value,
+        issue: document.getElementById("issue").value,
+        description: document.getElementById("description").value,
+        Status: document.getElementById("Status").value
+      };
+    }
+
+    function saveToLocalStorage(data) {
+      const existing = JSON.parse(localStorage.getItem("taskEscalations") || "[]");
+      existing.push(data);
+      localStorage.setItem("taskEscalations", JSON.stringify(existing));
+    }
+
+    function renderTable() {
+      const data = JSON.parse(localStorage.getItem("taskEscalations") || "[]");
+      tableBody.innerHTML = "";
+      data.forEach((d, index) => {
+        const row = `
+          <tr>
+            <td>${d.reportedBy}</td>
+            <td>${d.reportedDate}</td>
+            <td>${d.Report_To}</td>
+            <td>${d.application}</td>
+            <td>${d.priority}</td>
+            <td>${d.issue}</td>
+            <td>${d.description}</td>
+            <td>
+  <select onchange="updateStatus(${index}, this.value)">
+    <option value="Pending" ${d.Status === "Pending" ? "selected" : ""}>Pending</option>
+    <option value="InProgress" ${d.Status === "InProgress" ? "selected" : ""}>InProgress</option>
+    <option value="Resolved" ${d.Status === "Resolved" ? "selected" : ""}>Resolved</option>
+  </select>
+</td>
+            <td><button class="delete-btn" onclick="deleteRecord(${index})">Delete</button></td>
+          </tr>
+        `;
+        tableBody.innerHTML += row;
+      });
+    }
+    function updateStatus(index, newStatus) {
+  const data = JSON.parse(localStorage.getItem("taskEscalations") || "[]");
+  data[index].Status = newStatus;
+  localStorage.setItem("taskEscalations", JSON.stringify(data));
+  renderTable();
+}
+
+    function deleteRecord(index) {
+      if (!checkPassword()) return;
+      const data = JSON.parse(localStorage.getItem("taskEscalations") || "[]");
+      if (confirm("Are you sure you want to delete this record?")) {
+        data.splice(index, 1);
+        localStorage.setItem("taskEscalations", JSON.stringify(data));
+        renderTable();
+      }
+    }
+
+    function clearAllData() {
+      if (!checkPassword()) return;
+      if (confirm("Are you sure you want to clear ALL saved data?")) {
+        localStorage.removeItem("taskEscalations");
+        renderTable();
+      }
+    }
+
+    function checkPassword() {
+      const input = prompt("Enter password to proceed:");
+      if (input === PASSWORD) return true;
+      alert("Incorrect password. Access denied.");
+      return false;
+    }
+
+    function downloadCSV() {
+      const data = JSON.parse(localStorage.getItem("taskEscalations") || "[]");
+      if (data.length === 0) return alert("No data to export.");
+
+      const headers = Object.keys(data[0]);
+      const rows = data.map(row => headers.map(h => `"${row[h]}"`).join(","));
+      const csv = [headers.join(","), ...rows].join("\n");
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "task_escalations.csv";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    window.onload = renderTable;
+  </script>
+
+</body>
+</html>
